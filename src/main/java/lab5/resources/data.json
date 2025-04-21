@@ -7,7 +7,7 @@
       "y": 100
     },
     "creationDate": "2023-10-26T12:00:00+00:00",
-    "minimalPoint": 50L,
+    "minimalPoint": 50,
     "difficulty": "VERY_EASY",
     "author": {
       "name": "John Doe",
@@ -25,7 +25,7 @@
       "y": 200
     },
     "creationDate": "2023-10-26T14:00:00+00:00",
-    "minimalPoint": 75L,
+    "minimalPoint": 75,
     "difficulty": "VERY_HARD",
     "author": {
       "name": "Jane Smith",
