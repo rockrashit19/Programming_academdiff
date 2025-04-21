@@ -15,6 +15,7 @@ public class Main {
         InputManager inputManager = new InputManager(outputManager);
 
         String filePath = System.getenv("LAB_DATA_FILE");
+
         if (filePath == null || filePath.isEmpty()) {
             outputManager.println("Environment variable LAB_DATA_FILE is not set. Using a default empty collection.");
         }
@@ -47,12 +48,12 @@ public class Main {
 
             if (line.equals("exit")) {
                 commandManager.executeCommand("exit");
-                break; // Exit the loop, terminating the program
+                break;
             }
             if (!line.trim().isEmpty()) {
                 commandManager.executeCommand(line);
             }
         }
-        scanner.close(); //Closing scanner.
+        scanner.close();
     }
 }
