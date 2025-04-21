@@ -18,18 +18,6 @@ public class LabWork implements Comparable<LabWork> {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Coordinates getCoordinates() {
-        return coordinates;
-    }
-
-    public void setCoordinates(Coordinates coordinates) {
-        this.coordinates = coordinates;
-    }
-
     public ZonedDateTime getCreationDate() {
         return creationDate;
     }
@@ -42,24 +30,8 @@ public class LabWork implements Comparable<LabWork> {
         return minimalPoint;
     }
 
-    public void setMinimalPoint(Long minimalPoint) {
-        this.minimalPoint = minimalPoint;
-    }
-
     public Difficulty getDifficulty() {
         return difficulty;
-    }
-
-    public void setDifficulty(Difficulty difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public Person getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Person author) {
-        this.author = author;
     }
 
     @Override
