@@ -32,7 +32,6 @@ public class CollectionManager {
 
     public void add(LabWork labWork) {
         labWorks.add(labWork);
-        sort();
     }
 
     public boolean update(long id, LabWork newLabWork) {
@@ -41,7 +40,6 @@ public class CollectionManager {
                 newLabWork.setId(id);
                 newLabWork.setCreationDate(labWorks.get(i).getCreationDate());
                 labWorks.set(i, newLabWork);
-                sort();
                 return true;
             }
         }
@@ -69,7 +67,7 @@ public class CollectionManager {
     }
 
     public void sort() {
-        Collections.sort(labWorks);
+        Collections.sort(labWorks, Comparator.comparingLong(LabWork::getId));;
     }
 
     public void removeAllByDifficulty(Difficulty difficulty) {
@@ -112,6 +110,5 @@ public class CollectionManager {
 
     public void loadData(List<LabWork> data) {
         labWorks.addAll(data);
-        sort();
     }
 }

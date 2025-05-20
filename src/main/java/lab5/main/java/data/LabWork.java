@@ -66,7 +66,7 @@ public class LabWork implements Comparable<LabWork> {
 
     @Override
     public int compareTo(LabWork other) {
-        return this.name.compareTo(other.name);
+        return Long.compare(this.id, other.id);
     }
 
     @Override
