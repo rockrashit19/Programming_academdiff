@@ -41,7 +41,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String line;
         outputManager.println("Enter command (or 'help' for available commands):");
-
+//        outputManager.println("Current Working Directory: " + System.getProperty("user.dir"));
         while (true) {
             outputManager.print("> ");
             line = scanner.nextLine();
