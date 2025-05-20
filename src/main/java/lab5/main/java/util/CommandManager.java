@@ -24,7 +24,7 @@ public class CommandManager {
         addCommand(new RemoveByIdCommand(collectionManager, outputManager));
         addCommand(new ClearCommand(collectionManager, outputManager));
         addCommand(new SaveCommand(collectionManager, collectionSaver, outputManager));
-        addCommand(new ExecuteScriptCommand(this, outputManager));
+        addCommand(new ExecuteScriptCommand(this, inputManager, outputManager));
         addCommand(new ExitCommand(outputManager));
         addCommand(new ShuffleCommand(collectionManager, outputManager));
         addCommand(new ReorderCommand(collectionManager, outputManager));

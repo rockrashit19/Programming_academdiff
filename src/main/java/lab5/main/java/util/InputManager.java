@@ -9,20 +9,39 @@ import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
 
 public class InputManager {
     private final BufferedReader reader;
     private final OutputManager outputManager;
+    private Queue<String> scriptLines = new LinkedList<>();
 
     public InputManager(OutputManager outputManager) {
         this.reader = new BufferedReader(new InputStreamReader(System.in));
         this.outputManager = outputManager;
     }
 
+    public void setScriptLines(Queue<String> lines) {
+        this.scriptLines = lines;
+    }
+
+    public void clearScriptLines() {
+        this.scriptLines.clear();
+    }
+    public Queue<String> getScriptLines() {
+        return scriptLines;
+    }
+
     public String readLine(String prompt) {
         outputManager.print(prompt);
         try {
+            if (!scriptLines.isEmpty()) {
+                String line = scriptLines.poll();
+                outputManager.println(line);
+                return line;
+            }
             return reader.readLine();
         } catch (IOException e) {
             outputManager.println("Error reading input: " + e.getMessage());
