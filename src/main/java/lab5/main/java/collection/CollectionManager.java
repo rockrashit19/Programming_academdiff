@@ -67,7 +67,7 @@ public class CollectionManager {
     }
 
     public void sort() {
-        Collections.sort(labWorks, Comparator.comparingLong(LabWork::getId));;
+        labWorks.sort(Comparator.comparingLong(LabWork::getId));
     }
 
     public void removeAllByDifficulty(Difficulty difficulty) {
