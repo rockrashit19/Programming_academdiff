@@ -2,11 +2,8 @@ package lab5.main.java.util;
 
 import lab5.main.java.command.*;
 import lab5.main.java.collection.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+
+import java.util.*;
 
 
 public class CommandManager {
@@ -53,7 +50,7 @@ public class CommandManager {
     }
 
     public List<AbstractCommand> getAllCommands() {
-        return commands.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(commands.values());
     }
 
 }

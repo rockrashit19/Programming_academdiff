@@ -1,7 +1,6 @@
 package lab5.main.java.command;
 
 import lab5.main.java.util.*;
-import lab5.main.java.exception.ScriptRecursionException;
 
 import java.io.BufferedReader;
 import java.io.File;
