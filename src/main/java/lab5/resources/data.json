@@ -6,14 +6,13 @@
       "x": 10.5,
       "y": 100
     },
-    "creationDate": "2023-10-26T12:00:00+00:00",
+    "creationDate": "2023-10-26T12:00:00Z",
     "minimalPoint": 50,
     "difficulty": "VERY_EASY",
     "author": {
       "name": "John Doe",
-      "birthday": "1990-05-15T08:00:00+00:00",
+      "birthday": "1990-05-15T08:00:00Z",
       "passportID": "ABC123XYZ",
-      "eyeColor": "BLUE",
       "hairColor": "BROWN"
     }
   },
@@ -24,12 +23,12 @@
       "x": 20.0,
       "y": 200
     },
-    "creationDate": "2023-10-26T14:00:00+00:00",
+    "creationDate": "2023-10-26T14:00:00Z",
     "minimalPoint": 75,
     "difficulty": "VERY_HARD",
     "author": {
       "name": "Jane Smith",
-      "birthday": "1992-10-20T10:00:00+00:00",
+      "birthday": "1992-10-20T10:00:00Z",
       "passportID": "DEF456UVW",
       "eyeColor": "GREEN",
       "hairColor": "RED"

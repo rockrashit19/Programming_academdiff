@@ -1,21 +1,23 @@
 package lab5.main.java.util;
 
-import com.google.gson.*;
+import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class ZonedDateTimeAdapter extends TypeAdapter<ZonedDateTime> {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME;
 
     @Override
     public void write(JsonWriter out, ZonedDateTime value) throws IOException {
         if (value == null) {
-            out.nullValue(); // Записываем null, если объект null
+            out.nullValue();
         } else {
-            out.value(value.toString());
+            out.value(value.format(FORMATTER));
         }
     }
 
@@ -27,7 +29,7 @@ public class ZonedDateTimeAdapter extends TypeAdapter<ZonedDateTime> {
         }
         String zonedDateTimeString = in.nextString();
         try {
-            return ZonedDateTime.parse(zonedDateTimeString);
+            return ZonedDateTime.parse(zonedDateTimeString, FORMATTER);
         } catch (DateTimeParseException e) {
             throw new IOException("Failed to parse ZonedDateTime: " + zonedDateTimeString, e);
         }

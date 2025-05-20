@@ -5,8 +5,10 @@ import com.google.gson.GsonBuilder;
 import lab5.main.java.data.LabWork;
 import lab5.main.java.exception.FileSavingException;
 import lab5.main.java.util.OutputManager;
+import lab5.main.java.util.ZonedDateTimeAdapter;
 
 import java.io.PrintWriter;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public class CollectionSaver {
@@ -19,7 +21,10 @@ public class CollectionSaver {
     }
 
     public void saveCollection(List<LabWork> collection) throws FileSavingException {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
+                .create();
         String json = gson.toJson(collection);
 
         try (PrintWriter writer = new PrintWriter(filePath)) {

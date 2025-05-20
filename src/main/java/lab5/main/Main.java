@@ -21,7 +21,7 @@ public class Main {
         }
 
         CollectionManager collectionManager = new CollectionManager();
-        CollectionLoader collectionLoader = new CollectionLoader(filePath);
+        CollectionLoader collectionLoader = new CollectionLoader(filePath, outputManager);
         CollectionSaver collectionSaver = new CollectionSaver(filePath, outputManager);
 
         try {
