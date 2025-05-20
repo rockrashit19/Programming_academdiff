@@ -12,7 +12,7 @@ public class UpdateIdCommand extends AbstractCommand {
     private final OutputManager outputManager;
 
     public UpdateIdCommand(CollectionManager collectionManager, InputManager inputManager, OutputManager outputManager) {
-        super("update", "update id {element} : обновить значение элемента коллекции, id которого равен заданному");
+        super("update", "update {id} : обновить значение элемента коллекции, id которого равен заданному");
         this.collectionManager = collectionManager;
         this.inputManager = inputManager;
         this.outputManager = outputManager;

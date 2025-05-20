@@ -9,7 +9,7 @@ public class RemoveAnyByDifficultyCommand extends AbstractCommand{
     private final OutputManager outputManager;
 
     public RemoveAnyByDifficultyCommand(CollectionManager collectionManager, OutputManager outputManager) {
-        super("remove_any_by_difficulty", "remove_any_by_difficulty difficulty : удалить из коллекции " +
+        super("remove_any_by_difficulty", "remove_any_by_difficulty {difficulty} : удалить из коллекции " +
                 "один элемент, значение поля difficulty которого эквивалентно заданному");
         this.collectionManager = collectionManager;
         this.outputManager = outputManager;

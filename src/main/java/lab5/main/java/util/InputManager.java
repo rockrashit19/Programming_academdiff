@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class InputManager {
     private final BufferedReader reader;
@@ -67,7 +68,7 @@ public class InputManager {
     public Long getLongInput(String prompt, boolean nullable, long min) throws InvalidDataException {
         while (true) {
             String input = readLine(prompt);
-            if (nullable && (input == null || input.trim().isEmpty())) {
+            if (nullable && (input == null || input.trim().isEmpty()) || Objects.equals(input, "null")) {
                 return null;
             }
             try {
@@ -94,11 +95,14 @@ public class InputManager {
         }
     }
 
-    public <T extends Enum<T>> T getEnumInput(String prompt, Class<T> enumClass) throws InvalidDataException {
+    public <T extends Enum<T>> T getEnumInput(String prompt, Class<T> enumClass, boolean nullable) throws InvalidDataException {
         outputManager.println("Available options: " + String.join(", ", Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).toArray(String[]::new)));
 
         while (true) {
             String input = readLine(prompt);
+            if (nullable && (input == null || input.trim().isEmpty()) || Objects.equals(input, "null")) {
+                return null;
+            }
             try {
                 return Enum.valueOf(enumClass, input.toUpperCase());
             } catch (IllegalArgumentException e) {
@@ -115,7 +119,7 @@ public class InputManager {
             Coordinates coordinates = getCoordinatesFromInput();
 
             Long minimalPoint = getLongInput("Enter minimalPoint (can be null, > 0): ", true, 0);
-            Difficulty difficulty = getEnumInput("Enter difficulty: ", Difficulty.class);
+            Difficulty difficulty = getEnumInput("Enter difficulty (can be null): ", Difficulty.class, false);
             Person author = getPersonFromInput();
 
             return new LabWork(0, name, coordinates, ZonedDateTime.now(), minimalPoint, difficulty, author);
@@ -129,7 +133,7 @@ public class InputManager {
         try {
             outputManager.println("Creating Coordinates...");
             Double x = getDoubleInput("Enter x coordinate: ");
-            int y = getIntInput("Enter y coordinate (must be > -563): ", -564); //Corrected value.
+            int y = getIntInput("Enter y coordinate (must be > -563): ", -563); //Corrected value.
             return new Coordinates(x, y);
         } catch (InvalidDataException e) {
             outputManager.println("Error creating Coordinates: " + e.getMessage());
@@ -143,8 +147,8 @@ public class InputManager {
             String name = getStringInput("Enter person's name: ", false);
             ZonedDateTime birthday = getZonedDateTimeInput("Enter birthday (ISO 8601 format): ");
             String passportID = getStringInput("Enter passport ID: ", false);
-            Color eyeColor = getEnumInput("Enter eye color: ", Color.class);
-            Color hairColor = getEnumInput("Enter hair color (can be null): ", Color.class);
+            Color eyeColor = getEnumInput("Enter eye color: ", Color.class, false);
+            Color hairColor = getEnumInput("Enter hair color (can be null): ", Color.class, true);
             return new Person(name, birthday, passportID, eyeColor, hairColor);
         } catch (InvalidDataException e) {
             outputManager.println("Error creating Person: " + e.getMessage());

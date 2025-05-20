@@ -12,7 +12,7 @@ public class AddCommand extends AbstractCommand {
     private final OutputManager outputManager;
 
     public AddCommand(CollectionManager collectionManager, InputManager inputManager, OutputManager outputManager) {
-        super("add", "add {element} : добавить новый элемент в коллекцию");
+        super("add", "add : добавить новый элемент в коллекцию");
         this.collectionManager = collectionManager;
         this.inputManager = inputManager;
         this.outputManager = outputManager;
