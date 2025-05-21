@@ -2,10 +2,26 @@ package lab6.main.java.data;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
-public class LabWork implements Comparable<LabWork>, Serializable {
-    private long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+public class LabWork implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private long id;
+    private String name;
+    private Coordinates coordinates;
+    private ZonedDateTime creationDate;
+    private Long minimalPoint;
+    private Difficulty difficulty;
+    private Person author;
+
+    public LabWork(long id, String name, Coordinates coordinates, ZonedDateTime creationDate, Long minimalPoint, Difficulty difficulty, Person author) {
+        this.id = id;
+        this.name = name;
+        this.coordinates = coordinates;
+        this.creationDate = creationDate;
+        this.minimalPoint = minimalPoint;
+        this.difficulty = difficulty;
+        this.author = author;
+    }
 
     public long getId() {
         return id;
@@ -17,6 +33,10 @@ public class LabWork implements Comparable<LabWork>, Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public Coordinates getCoordinates() {
+        return coordinates;
     }
 
     public ZonedDateTime getCreationDate() {
@@ -35,6 +55,10 @@ public class LabWork implements Comparable<LabWork>, Serializable {
         return difficulty;
     }
 
+    public Person getAuthor() {
+        return author;
+    }
+
     @Override
     public String toString() {
         return "LabWork{" +
@@ -46,40 +70,5 @@ public class LabWork implements Comparable<LabWork>, Serializable {
                 ", difficulty=" + difficulty +
                 ", author=" + author +
                 '}';
-    }
-
-    private String name; //Поле не может быть null, Строка не может быть пустой
-    private Coordinates coordinates; //Поле не может быть null
-    private ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
-    private Long minimalPoint; //Поле может быть null, Значение поля должно быть больше 0
-    private Difficulty difficulty; //Поле может быть null
-    private Person author; //Поле может быть null
-
-    public LabWork(long id, String name, Coordinates coordinates, ZonedDateTime creationDate, Long minimalPoint, Difficulty difficulty, Person author) {
-        this.id = id;
-        this.name = name;
-        this.coordinates = coordinates;
-        this.creationDate = creationDate;
-        this.minimalPoint = minimalPoint;
-        this.difficulty = difficulty;
-        this.author = author;
-    }
-
-    @Override
-    public int compareTo(LabWork other) {
-        return Long.compare(this.id, other.id);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LabWork labWork = (LabWork) o;
-        return id == labWork.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Client {
@@ -57,7 +58,7 @@ public class Client {
 
                 if (!processCommand(line, socket, executeScriptCommand)) {
                     if (line.startsWith("exit")) {
-                        break; // Завершаем работу, если exit отправлен на сервер и обработан
+                        break;
                     }
                     continue;
                 }
@@ -154,7 +155,14 @@ public class Client {
 
                 outputManager.println(response.getMessage());
                 if (response.getCollection() != null) {
-                    response.getCollection().forEach(labWork -> outputManager.println(labWork.toString()));
+                    try {
+                        @SuppressWarnings("unchecked")
+                        List<LabWork> labWorks = (List<LabWork>) response.getCollection();
+                        labWorks.forEach(labWork -> outputManager.println(labWork.toString()));
+                    } catch (ClassCastException e) {
+                        outputManager.println("Error: Received collection is not a list of LabWork objects.");
+                        return false;
+                    }
                 }
                 return response.isSuccess() || request.getCommandName().equals("exit");
 

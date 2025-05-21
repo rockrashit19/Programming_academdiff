@@ -3,6 +3,7 @@ package lab6.main.java.collection;
 import lab6.main.java.data.*;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
@@ -30,22 +31,19 @@ public class CollectionManager {
     }
 
     public void add(LabWork labWork) {
-        labWork.setId(generateNextId());
-        labWork.setCreationDate(ZonedDateTime.now());
         labWorks.add(labWork);
     }
 
     public boolean update(long id, LabWork newLabWork) {
-        return labWorks.stream()
-                .filter(labWork -> labWork.getId() == id)
-                .findFirst()
-                .map(labWork -> {
-                    newLabWork.setId(id);
-                    newLabWork.setCreationDate(labWork.getCreationDate());
-                    labWorks.set(labWorks.indexOf(labWork), newLabWork);
-                    return true;
-                })
-                .orElse(false);
+        for (int i = 0; i < labWorks.size(); i++) {
+            if (labWorks.get(i).getId() == id) {
+                newLabWork.setId(id);
+                newLabWork.setCreationDate(labWorks.get(i).getCreationDate());
+                labWorks.set(i, newLabWork);
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean removeById(long id) {
@@ -63,47 +61,44 @@ public class CollectionManager {
     }
 
     public void shuffle() {
-        labWorks = new Vector<>(labWorks.stream()
-                .sorted((a, b) -> (int) (Math.random() * 3 - 1))
-                .collect(Collectors.toList()));
+        Collections.shuffle(labWorks);
     }
 
     public void reorder() {
-        labWorks = new Vector<>(labWorks.stream()
-                .sorted(Comparator.comparing(LabWork::getName).reversed())
-                .collect(Collectors.toList()));
+        Collections.reverse(labWorks);
     }
 
     public void sort() {
-        labWorks = new Vector<>(labWorks.stream()
-                .sorted(Comparator.comparingLong(LabWork::getId))
-                .collect(Collectors.toList()));
+        labWorks.sort(Comparator.comparingLong(LabWork::getId));
     }
 
     public void removeAllByDifficulty(Difficulty difficulty) {
         labWorks.removeIf(labWork -> labWork.getDifficulty() == difficulty);
     }
 
-    public boolean removeAnyByDifficulty(Difficulty difficulty) {
-        labWorks.stream()
-                .filter(labWork -> labWork.getDifficulty() == difficulty)
-                .findFirst()
-                .ifPresent(labWork -> labWorks.remove(labWork));
-        return false;
+    public void removeAnyByDifficulty(Difficulty difficulty) {
+        for (LabWork labWork : labWorks) {
+            if (labWork.getDifficulty() == difficulty) {
+                labWorks.remove(labWork);
+                break;
+            }
+        }
     }
 
     public List<LabWork> filterGreaterThanMinimalPoint(Long minimalPoint) {
         return labWorks.stream()
                 .filter(labWork -> labWork.getMinimalPoint() != null && labWork.getMinimalPoint() > minimalPoint)
-                .sorted(Comparator.comparing(LabWork::getName))
                 .collect(Collectors.toList());
     }
 
     public long generateNextId() {
-        return labWorks.isEmpty() ? 1 : labWorks.stream()
-                .mapToLong(LabWork::getId)
-                .max()
-                .orElse(0) + 1;
+        if (labWorks.isEmpty()) {
+            return 1;
+        }
+        return labWorks.stream()
+                .max(Comparator.comparing(LabWork::getId))
+                .map(labWork -> labWork.getId() + 1)
+                .orElse(1L);
     }
 
     public boolean containsId(long id) {

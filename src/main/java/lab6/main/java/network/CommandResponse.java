@@ -1,16 +1,15 @@
 package lab6.main.java.network;
 
-import lab6.main.java.data.LabWork;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class CommandResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final boolean success;
     private final String message;
-    private final List<LabWork> collection;
+    private final List<?> collection;
 
-    public CommandResponse(boolean success, String message, List<LabWork> collection) {
+    public CommandResponse(boolean success, String message, List<?> collection) {
         this.success = success;
         this.message = message;
         this.collection = collection;
@@ -24,7 +23,7 @@ public class CommandResponse implements Serializable {
         return message;
     }
 
-    public List<LabWork> getCollection() {
+    public List<?> getCollection() {
         return collection;
     }
 }

@@ -16,6 +16,12 @@ public class ShowCommand extends AbstractCommand {
         if (!argument.isEmpty()) {
             return new CommandResponse(false, "This command doesn't require an argument.", null);
         }
-        return new CommandResponse(true, collectionManager.getAll().isEmpty() ? "Collection is empty." : "Collection retrieved.", collectionManager.getAll());
+        try {
+            var collection = collectionManager.getAll();
+            String message = collection.isEmpty() ? "Collection is empty." : "Collection retrieved with " + collection.size() + " elements.";
+            return new CommandResponse(true, message, collection);
+        } catch (Exception e) {
+            return new CommandResponse(false, "Error retrieving collection: " + e.getMessage(), null);
+        }
     }
 }

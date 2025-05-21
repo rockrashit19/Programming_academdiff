@@ -41,6 +41,7 @@ public class Server {
         try {
             List<LabWork> data = loader.loadCollection();
             collectionManager.loadData(data);
+            outputManager.println("Loaded " + data.size() + " elements from " + filePath);
         } catch (FileLoadingException e) {
             outputManager.println("Failed to load collection: " + e.getMessage());
         }
@@ -82,8 +83,10 @@ public class Server {
 
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
             CommandRequest request = (CommandRequest) ois.readObject();
+            outputManager.println("Received command: " + request.getCommandName());
 
             CommandResponse response = commandManager.executeCommand(request);
+            outputManager.println("Sending response: " + response.getMessage());
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -106,5 +109,9 @@ public class Server {
         } catch (java.io.IOException e) {
             outputManager.println("Error during server shutdown: " + e.getMessage());
         }
+    }
+
+    public void saveCollection() {
+        commandManager.executeSaveCommand();
     }
 }
