@@ -28,7 +28,6 @@ public class Main {
             if (filePath != null && !filePath.isEmpty()) {
                 List<LabWork> initialData = collectionLoader.loadCollection();
                 collectionManager.loadData(initialData);
-                outputManager.println("Collection loaded successfully from " + filePath);
             }
         } catch (FileLoadingException e) {
             outputManager.println("Error loading collection: " + e.getMessage());
