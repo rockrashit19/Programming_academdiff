@@ -4,7 +4,7 @@ import lab6.main.java.network.CommandResponse;
 
 public class ExitCommand extends AbstractCommand {
     public ExitCommand() {
-        super("exit", "exit the client (without saving)");
+        super("exit", "exit : exit the client (without saving)");
     }
 
     @Override

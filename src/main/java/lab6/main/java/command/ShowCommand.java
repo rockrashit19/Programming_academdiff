@@ -3,11 +3,14 @@ package lab6.main.java.command;
 import lab6.main.java.collection.CollectionManager;
 import lab6.main.java.network.CommandResponse;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class ShowCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public ShowCommand(CollectionManager collectionManager) {
-        super("show", "display all elements in the collection");
+        super("show", "show : display all elements in the collection");
         this.collectionManager = collectionManager;
     }
 
@@ -17,7 +20,8 @@ public class ShowCommand extends AbstractCommand {
             return new CommandResponse(false, "This command doesn't require an argument.", null);
         }
         try {
-            var collection = collectionManager.getAll();
+            List<Object> collection = collectionManager.getAll().stream()
+                    .collect(Collectors.toList());
             String message = collection.isEmpty() ? "Collection is empty." : "Collection retrieved with " + collection.size() + " elements.";
             return new CommandResponse(true, message, collection);
         } catch (Exception e) {

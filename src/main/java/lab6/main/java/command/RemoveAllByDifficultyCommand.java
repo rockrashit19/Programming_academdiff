@@ -8,7 +8,7 @@ public class RemoveAllByDifficultyCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public RemoveAllByDifficultyCommand(CollectionManager collectionManager) {
-        super("remove_all_by_difficulty", "remove_all_by_difficulty difficulty : remove all LabWorks with specified difficulty");
+        super("remove_all_by_difficulty", "remove_all_by_difficulty {difficulty} : remove all LabWorks with specified difficulty");
         this.collectionManager = collectionManager;
     }
 

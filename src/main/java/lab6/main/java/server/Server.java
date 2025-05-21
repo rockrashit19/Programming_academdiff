@@ -19,6 +19,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server {
     private final int port;
@@ -27,12 +28,14 @@ public class Server {
     private final CommandManager commandManager;
     private DatagramChannel channel;
     private Selector selector;
+    private volatile boolean running;
 
     public Server(int port, String filePath) {
         this.port = port;
         this.outputManager = new OutputManager(System.out);
-        this.collectionManager = new CollectionManager();
+        this.collectionManager = new CollectionManager(filePath);
         this.commandManager = new CommandManager(collectionManager, outputManager);
+        this.running = true;
         loadInitialCollection(filePath);
     }
 
@@ -56,7 +59,11 @@ public class Server {
             channel.register(selector, SelectionKey.OP_READ);
             outputManager.println("Server started on port " + port);
 
-            while (true) {
+            // Запуск потока для обработки консольных команд
+            Thread consoleThread = new Thread(this::handleConsoleCommands);
+            consoleThread.start();
+
+            while (running) {
                 selector.select();
                 Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
                 while (keyIterator.hasNext()) {
@@ -69,6 +76,8 @@ public class Server {
             }
         } catch (Exception e) {
             outputManager.println("Server error: " + e.getMessage());
+            stop();
+        } finally {
             stop();
         }
     }
@@ -100,18 +109,39 @@ public class Server {
         }
     }
 
-    public void stop() {
-        try {
-            commandManager.executeSaveCommand();
-            outputManager.println("Collection saved on server shutdown.");
-            if (channel != null) channel.close();
-            if (selector != null) selector.close();
-        } catch (java.io.IOException e) {
-            outputManager.println("Error during server shutdown: " + e.getMessage());
+    private void handleConsoleCommands() {
+        Scanner scanner = new Scanner(System.in);
+        while (running) {
+            outputManager.print("Server> ");
+            String line = scanner.nextLine().trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            String[] parts = line.split("\\s+", 2);
+            String commandName = parts[0].toLowerCase();
+
+            if (commandName.equals("server_save")) {
+                commandManager.executeSaveCommand();
+            } else {
+                outputManager.println("Unknown server command: " + commandName);
+            }
         }
+        scanner.close();
     }
 
-    public void saveCollection() {
-        commandManager.executeSaveCommand();
+    public void stop() {
+        try {
+            running = false;
+            commandManager.executeSaveCommand();
+            outputManager.println("Collection saved on server shutdown.");
+            if (channel != null) {
+                channel.close();
+            }
+            if (selector != null) {
+                selector.close();
+            }
+        } catch (Exception e) {
+            outputManager.println("Error during server shutdown: " + e.getMessage());
+        }
     }
 }

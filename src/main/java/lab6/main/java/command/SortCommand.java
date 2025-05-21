@@ -7,7 +7,7 @@ public class SortCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public SortCommand(CollectionManager collectionManager) {
-        super("sort", "sort the collection by id");
+        super("sort", "sort : sort the collection by id");
         this.collectionManager = collectionManager;
     }
 
@@ -16,7 +16,11 @@ public class SortCommand extends AbstractCommand {
         if (!argument.isEmpty()) {
             return new CommandResponse(false, "This command doesn't require an argument.", null);
         }
-        collectionManager.sort();
-        return new CommandResponse(true, "Collection sorted successfully!", null);
+        try {
+            collectionManager.sort();
+            return new CommandResponse(true, "Collection sorted successfully!", null);
+        } catch (Exception e) {
+            return new CommandResponse(false, "Error sorting collection: " + e.getMessage(), null);
+        }
     }
 }

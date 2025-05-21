@@ -8,7 +8,7 @@ public class UpdateIdCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public UpdateIdCommand(CollectionManager collectionManager) {
-        super("update", "update id : update LabWork with specified id");
+        super("update", "update {id} : update LabWork with specified id");
         this.collectionManager = collectionManager;
     }
 

@@ -1,6 +1,10 @@
 package lab6.main.java.collection;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lab6.main.java.data.*;
+import lab6.main.java.exception.FileSavingException;
+import lab6.main.java.util.ZonedDateTimeAdapter;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -8,14 +12,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
+import java.io.PrintWriter;
 
 public class CollectionManager {
     private Vector<LabWork> labWorks;
     private ZonedDateTime initializationDate;
+    private final String filePath;
 
-    public CollectionManager() {
-        labWorks = new Vector<>();
-        initializationDate = ZonedDateTime.now();
+    public CollectionManager(String filePath) {
+        this.labWorks = new Vector<>();
+        this.initializationDate = ZonedDateTime.now();
+        this.filePath = filePath;
     }
 
     public ZonedDateTime getInitializationDate() {
@@ -34,16 +41,15 @@ public class CollectionManager {
         labWorks.add(labWork);
     }
 
-    public boolean update(long id, LabWork newLabWork) {
+    public void update(long id, LabWork newLabWork) {
         for (int i = 0; i < labWorks.size(); i++) {
             if (labWorks.get(i).getId() == id) {
                 newLabWork.setId(id);
                 newLabWork.setCreationDate(labWorks.get(i).getCreationDate());
                 labWorks.set(i, newLabWork);
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     public boolean removeById(long id) {
@@ -77,19 +83,14 @@ public class CollectionManager {
     }
 
     public boolean removeAnyByDifficulty(Difficulty difficulty) {
-        for (LabWork labWork : labWorks) {
+        for (int i = 0; i < labWorks.size(); i++) {
+            LabWork labWork = labWorks.get(i);
             if (labWork.getDifficulty() == difficulty) {
-                labWorks.remove(labWork);
-                break;
+                labWorks.remove(i);
+                return true;
             }
         }
         return false;
-    }
-
-    public List<LabWork> filterGreaterThanMinimalPoint(Long minimalPoint) {
-        return labWorks.stream()
-                .filter(labWork -> labWork.getMinimalPoint() != null && labWork.getMinimalPoint() > minimalPoint)
-                .collect(Collectors.toList());
     }
 
     public long generateNextId() {
@@ -108,5 +109,19 @@ public class CollectionManager {
 
     public void loadData(List<LabWork> data) {
         labWorks.addAll(data);
+    }
+
+    public void saveToFile() throws FileSavingException {
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
+                .create();
+        String json = gson.toJson(labWorks);
+
+        try (PrintWriter writer = new PrintWriter(filePath)) {
+            writer.write(json);
+        } catch (Exception e) {
+            throw new FileSavingException("Error saving collection to file: " + e.getMessage());
+        }
     }
 }

@@ -8,7 +8,7 @@ public class HelpCommand extends AbstractCommand {
     private final List<AbstractCommand> commands;
 
     public HelpCommand(List<AbstractCommand> commands) {
-        super("help", "display available commands");
+        super("help", "help : display available commands");
         this.commands = commands;
     }
 
@@ -17,7 +17,7 @@ public class HelpCommand extends AbstractCommand {
         StringBuilder message = new StringBuilder("Available commands:\n");
         for (AbstractCommand command : commands) {
             if (!command.getName().equals("save")) {
-                message.append(command.getName()).append(" : ").append(command.getDescription()).append("\n");
+                message.append(command.getDescription()).append("\n");
             }
         }
         return new CommandResponse(true, message.toString(), null);

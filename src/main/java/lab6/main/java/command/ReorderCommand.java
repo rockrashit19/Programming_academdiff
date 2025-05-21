@@ -7,7 +7,7 @@ public class ReorderCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public ReorderCommand(CollectionManager collectionManager) {
-        super("reorder", "reverse the collection order");
+        super("reorder", "reorder : reverse the collection order");
         this.collectionManager = collectionManager;
     }
 

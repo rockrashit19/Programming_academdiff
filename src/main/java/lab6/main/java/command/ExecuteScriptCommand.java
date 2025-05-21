@@ -1,190 +1,184 @@
 package lab6.main.java.command;
 
+import lab6.main.java.client.Client;
 import lab6.main.java.data.LabWork;
 import lab6.main.java.network.CommandRequest;
 import lab6.main.java.network.CommandResponse;
 import lab6.main.java.util.InputManager;
 import lab6.main.java.util.OutputManager;
 
-import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
-import java.util.HashSet;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
-public class ExecuteScriptCommand {
+public class ExecuteScriptCommand extends AbstractCommand {
     private final InputManager inputManager;
     private final OutputManager outputManager;
-    private final String host;
-    private final int port;
-    private final int timeout;
-    private final int maxRetries;
-    private final Set<String> scriptStack = new HashSet<>();
-    private static final String RELATIVE_RESOURCES_DIR = "src/main/java/lab6/resources/";
+    private final Client client;
+    private static final int MAX_NESTING_LEVEL = 10;
+    private static final ThreadLocal<List<String>> executedScripts = ThreadLocal.withInitial(ArrayList::new);
 
-    public ExecuteScriptCommand(InputManager inputManager, OutputManager outputManager, String host, int port, int timeout, int maxRetries) {
+    public ExecuteScriptCommand(Client client, InputManager inputManager, OutputManager outputManager) {
+        super("execute_script", "execute_script <file_name> : execute commands from a file");
+        this.client = client;
         this.inputManager = inputManager;
         this.outputManager = outputManager;
-        this.host = host;
-        this.port = port;
-        this.timeout = timeout;
-        this.maxRetries = maxRetries;
     }
 
-    public boolean execute(String argument, DatagramSocket socket) {
-        if (argument == null || argument.isEmpty()) {
-            outputManager.println("Usage: execute_script <file_name>");
-            return false;
+    @Override
+    public CommandResponse execute(String argument, Object... args) {
+        if (argument == null || argument.trim().isEmpty()) {
+            return new CommandResponse(false, "Usage: execute_script <file_name>", null);
         }
 
-        File scriptFile = new File(RELATIVE_RESOURCES_DIR + argument);
-        outputManager.println("Looking for file at: " + scriptFile.getAbsolutePath());
-
-        if (!scriptFile.exists() || !scriptFile.isFile()) {
-            outputManager.println("File not found or is not a file: " + argument);
-            return false;
-        }
-
-        if (!scriptFile.canRead()) {
-            outputManager.println("Cannot read file: " + argument);
-            return false;
-        }
-
-        String canonicalPath;
         try {
-            canonicalPath = scriptFile.getCanonicalPath();
-        } catch (IOException e) {
-            outputManager.println("Error getting canonical path: " + e.getMessage());
-            return false;
-        }
+            Path scriptPath = Paths.get("src/main/java/lab6/resources", argument).toAbsolutePath().normalize();
+            outputManager.println("Looking for file at: " + scriptPath);
 
-        if (scriptStack.contains(canonicalPath)) {
-            outputManager.println("Script recursion detected: " + argument);
-            return false;
-        }
+            // Проверка на рекурсию
+            List<String> currentScripts = executedScripts.get();
+            String scriptPathStr = scriptPath.toString();
+            if (currentScripts.contains(scriptPathStr)) {
+                return new CommandResponse(false, "Recursion detected: script " + argument + " is already being executed.", null);
+            }
+            if (currentScripts.size() >= MAX_NESTING_LEVEL) {
+                return new CommandResponse(false, "Maximum nesting level (" + MAX_NESTING_LEVEL + ") exceeded.", null);
+            }
 
-        scriptStack.add(canonicalPath);
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(scriptFile))) {
-            Queue<String> scriptLines = new LinkedList<>();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
+            // Добавляем текущий скрипт в список выполненных
+            currentScripts.add(scriptPathStr);
+            try (BufferedReader reader = new BufferedReader(new FileReader(scriptPath.toFile()))) {
+                Queue<String> scriptLines = new LinkedList<>();
+                String line;
+                while ((line = reader.readLine()) != null) {
                     scriptLines.add(line);
                 }
-            }
 
-            while (!scriptLines.isEmpty()) {
-                String commandLine = scriptLines.poll();
-                outputManager.println("Executing script command: " + commandLine);
+                while (!scriptLines.isEmpty()) {
+                    String commandLine = scriptLines.poll().trim();
+                    if (commandLine.isEmpty()) continue;
 
-                CommandRequest request = parseScriptCommand(commandLine, scriptLines);
-                if (request == null) {
-                    outputManager.println("Error parsing command from script: " + commandLine);
-                    continue;
+                    outputManager.println("Executing script command: " + commandLine);
+                    String[] parts = commandLine.split("\\s+", 2);
+                    String commandName = parts[0].toLowerCase();
+                    String commandArg = parts.length > 1 ? parts[1] : "";
+
+                    CommandRequest commandRequest;
+                    // Обработка команд
+                    if (commandName.equals("add")) {
+                        inputManager.setScriptLines(new LinkedList<>(scriptLines));
+                        try {
+                            LabWork labWork = inputManager.getLabWorkFromInput();
+                            if (labWork == null) {
+                                outputManager.println("Failed to create LabWork from script.");
+                                return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                            }
+                            scriptLines.clear();
+                            scriptLines.addAll(inputManager.getScriptLines());
+                            commandRequest = new CommandRequest(commandName, "", labWork);
+                        } catch (Exception e) {
+                            outputManager.println("Error creating LabWork from script: " + e.getMessage());
+                            return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                        } finally {
+                            inputManager.clearScriptLines();
+                        }
+                    } else if (commandName.equals("update")) {
+                        // Проверка наличия аргумента id
+                        if (commandArg == null || commandArg.trim().isEmpty()) {
+                            outputManager.println("Usage: update <id>");
+                            return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                        }
+                        // Проверка валидности id
+                        long id;
+                        try {
+                            id = Long.parseLong(commandArg);
+                        } catch (NumberFormatException e) {
+                            outputManager.println("Invalid id format: " + commandArg);
+                            return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                        }
+                        // Проверка существования LabWork с id
+                        CommandRequest showRequest = new CommandRequest("show", "");
+                        CommandResponse showResponse = client.sendRequest(showRequest);
+                        if (showResponse == null || !showResponse.isSuccess()) {
+                            outputManager.println(showResponse != null ? showResponse.getMessage() : "Failed to retrieve collection.");
+                            return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                        }
+                        List<Object> labWorks = showResponse.getData();
+                        boolean idExists = false;
+                        if (labWorks != null) {
+                            for (Object obj : labWorks) {
+                                if (obj instanceof LabWork labWork && labWork.getId() == id) {
+                                    idExists = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!idExists) {
+                            outputManager.println("No LabWork with id " + id + " found.");
+                            return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                        }
+                        // Создание LabWork
+                        inputManager.setScriptLines(new LinkedList<>(scriptLines));
+                        try {
+                            LabWork labWork = inputManager.getLabWorkFromInput();
+                            if (labWork == null) {
+                                outputManager.println("Failed to create LabWork from script.");
+                                return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                            }
+                            scriptLines.clear();
+                            scriptLines.addAll(inputManager.getScriptLines());
+                            commandRequest = new CommandRequest(commandName, commandArg, labWork);
+                        } catch (Exception e) {
+                            outputManager.println("Error creating LabWork from script: " + e.getMessage());
+                            return new CommandResponse(false, "Error parsing command from script: " + commandLine, null);
+                        } finally {
+                            inputManager.clearScriptLines();
+                        }
+                    } else if (commandName.equals("execute_script")) {
+                        CommandResponse nestedResponse = execute(commandArg);
+                        if (!nestedResponse.isSuccess()) {
+                            return nestedResponse;
+                        }
+                        continue;
+                    } else {
+                        commandRequest = new CommandRequest(commandName, commandArg);
+                    }
+
+                    // Отправка команды на сервер
+                    CommandResponse response = client.sendRequest(commandRequest);
+                    if (response == null) {
+                        return new CommandResponse(false, "No response from server for command: " + commandLine, null);
+                    }
+                    outputManager.println(response.getMessage());
+                    // Безопасная обработка data
+                    List<Object> responseData = response.getData();
+                    if (responseData != null && !responseData.isEmpty()) {
+                        responseData.forEach(item -> {
+                            if (item != null) {
+                                outputManager.println(item.toString());
+                            }
+                        });
+                    }
+                    if (!response.isSuccess()) {
+                        return new CommandResponse(false, "Error executing command from script: " + commandLine, null);
+                    }
                 }
 
-                if (!sendRequest(socket, request)) {
-                    outputManager.println("Error executing command from script: " + commandLine);
-                    inputManager.clearScriptLines();
-                    scriptStack.remove(canonicalPath);
-                    return false;
-                }
-            }
-            scriptStack.remove(canonicalPath);
-            return true;
-        } catch (IOException e) {
-            outputManager.println("Error reading script file: " + e.getMessage());
-            scriptStack.remove(canonicalPath);
-            return false;
-        }
-    }
-
-    private CommandRequest parseScriptCommand(String commandLine, Queue<String> scriptLines) {
-        String[] parts = commandLine.trim().split("\\s+", 2);
-        String commandName = parts[0].toLowerCase();
-        String argument = parts.length > 1 ? parts[1] : "";
-
-        if (commandName.equals("save")) {
-            outputManager.println("Command 'save' is not available on the client.");
-            return null;
-        }
-
-        if (commandName.equals("execute_script")) {
-            outputManager.println("Nested execute_script is not allowed in scripts.");
-            return null;
-        }
-
-        if (commandName.equals("add") || commandName.equals("update")) {
-            inputManager.setScriptLines(new LinkedList<>(scriptLines));
-            try {
-                LabWork labWork = inputManager.getLabWorkFromInput();
-                if (labWork == null) {
-                    outputManager.println("Failed to create LabWork from script.");
-                    return null;
-                }
-                scriptLines.clear();
-                scriptLines.addAll(inputManager.getScriptLines());
-                return new CommandRequest(commandName, commandName.equals("update") ? argument : "", labWork);
-            } catch (Exception e) {
-                outputManager.println("Error creating LabWork from script: " + e.getMessage());
-                return null;
+                return new CommandResponse(true, "Script executed successfully!", null);
             } finally {
-                inputManager.clearScriptLines();
+                // Удаляем скрипт из списка после выполнения
+                currentScripts.remove(scriptPathStr);
             }
+        } catch (IOException e) {
+            return new CommandResponse(false, "Error reading script file: " + e.getMessage(), null);
+        } catch (Exception e) {
+            return new CommandResponse(false, "Error executing script: " + e.getMessage(), null);
         }
-
-        return new CommandRequest(commandName, argument, null);
-    }
-
-    private boolean sendRequest(DatagramSocket socket, CommandRequest request) {
-        int retries = 0;
-        while (retries < maxRetries) {
-            try {
-                // Сериализация запроса
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(request);
-                oos.flush();
-                byte[] data = baos.toByteArray();
-
-                // Отправка запроса
-                DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(host), port);
-                socket.send(packet);
-
-                // Получение ответа
-                byte[] buffer = new byte[65536];
-                DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-                socket.receive(responsePacket);
-
-                // Десериализация ответа
-                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buffer, 0, responsePacket.getLength()));
-                CommandResponse response = (CommandResponse) ois.readObject();
-
-                // Вывод результата
-                outputManager.println(response.getMessage());
-                if (response.getCollection() != null) {
-                    response.getCollection().forEach(labWork -> outputManager.println(labWork.toString()));
-                }
-                return response.isSuccess();
-
-            } catch (SocketTimeoutException e) {
-                retries++;
-                outputManager.println("Server not responding, retrying (" + retries + "/" + maxRetries + ")...");
-                if (retries == maxRetries) {
-                    outputManager.println("Server is unavailable after " + maxRetries + " retries.");
-                    return false;
-                }
-            } catch (Exception e) {
-                outputManager.println("Error communicating with server: " + e.getMessage());
-                return false;
-            }
-        }
-        return false;
     }
 }

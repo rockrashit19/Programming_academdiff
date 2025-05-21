@@ -7,7 +7,7 @@ public class InfoCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public InfoCommand(CollectionManager collectionManager) {
-        super("info", "display collection information");
+        super("info", "info : display collection information");
         this.collectionManager = collectionManager;
     }
 

@@ -33,6 +33,8 @@ public class CommandManager {
         commandList.add(new RemoveAnyByDifficultyCommand(collectionManager));
         commandList.add(new FilterGreaterThanMinimalPointCommand(collectionManager));
         commandList.add(new ExitCommand());
+        commandList.add(new SaveCommand(collectionManager));
+        commandList.add(new ServerExecuteScriptCommand());
         for (AbstractCommand command : commandList) {
             commands.put(command.getName(), command);
         }
@@ -60,9 +62,5 @@ public class CommandManager {
         if (saveCommand != null) {
             saveCommand.execute("", null);
         }
-    }
-
-    public List<AbstractCommand> getAllCommands() {
-        return new ArrayList<>(commands.values());
     }
 }

@@ -7,7 +7,7 @@ public class ShuffleCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public ShuffleCommand(CollectionManager collectionManager) {
-        super("shuffle", "shuffle the collection");
+        super("shuffle", "shuffle : shuffle the collection");
         this.collectionManager = collectionManager;
     }
 

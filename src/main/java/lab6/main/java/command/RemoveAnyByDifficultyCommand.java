@@ -8,21 +8,27 @@ public class RemoveAnyByDifficultyCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public RemoveAnyByDifficultyCommand(CollectionManager collectionManager) {
-        super("remove_any_by_difficulty", "remove_any_by_difficulty difficulty : remove one LabWork with specified difficulty");
+        super("remove_any_by_difficulty", "remove_any_by_difficulty {difficulty} : remove one LabWork with specified difficulty");
         this.collectionManager = collectionManager;
     }
 
     @Override
     public CommandResponse execute(String argument, Object... args) {
-        if (argument.isEmpty()) {
-            return new CommandResponse(false, "Usage: remove_any_by_difficulty <difficulty>\nAvailable difficulties: " + String.join(", ", Difficulty.names()), null);
+        if (argument == null || argument.trim().isEmpty()) {
+            return new CommandResponse(false, "Usage: remove_any_by_difficulty <difficulty>", null);
         }
         try {
-            Difficulty difficulty = Difficulty.valueOf(argument.toUpperCase());
-            boolean success = collectionManager.removeAnyByDifficulty(difficulty);
-            return new CommandResponse(success, success ? "One LabWork with difficulty " + difficulty + " removed." : "No LabWork found with difficulty " + difficulty, null);
+            Difficulty difficulty = Difficulty.valueOf(argument.trim().toUpperCase());
+            boolean removed = collectionManager.removeAnyByDifficulty(difficulty);
+            if (removed) {
+                return new CommandResponse(true, "LabWork with difficulty " + difficulty + " removed successfully!", null);
+            } else {
+                return new CommandResponse(false, "No LabWork found with difficulty " + difficulty, null);
+            }
         } catch (IllegalArgumentException e) {
-            return new CommandResponse(false, "Invalid difficulty. Available difficulties: " + String.join(", ", Difficulty.names()), null);
+            return new CommandResponse(false, "Invalid difficulty: " + argument + ". Available options: " + String.join(", ", Difficulty.names()), null);
+        } catch (Exception e) {
+            return new CommandResponse(false, "Error removing LabWork: " + e.getMessage(), null);
         }
     }
 }

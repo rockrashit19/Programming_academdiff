@@ -10,7 +10,7 @@ public class AddCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public AddCommand(CollectionManager collectionManager) {
-        super("add", "add a new LabWork");
+        super("add", "add : add a new LabWork");
         this.collectionManager = collectionManager;
     }
 

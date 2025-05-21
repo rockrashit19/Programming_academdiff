@@ -7,7 +7,7 @@ public class RemoveByIdCommand extends AbstractCommand {
     private final CollectionManager collectionManager;
 
     public RemoveByIdCommand(CollectionManager collectionManager) {
-        super("remove_by_id", "remove_by_id id : remove LabWork by id");
+        super("remove_by_id", "remove_by_id {id} : remove LabWork by id");
         this.collectionManager = collectionManager;
     }
 
