@@ -76,13 +76,14 @@ public class CollectionManager {
         labWorks.removeIf(labWork -> labWork.getDifficulty() == difficulty);
     }
 
-    public void removeAnyByDifficulty(Difficulty difficulty) {
+    public boolean removeAnyByDifficulty(Difficulty difficulty) {
         for (LabWork labWork : labWorks) {
             if (labWork.getDifficulty() == difficulty) {
                 labWorks.remove(labWork);
                 break;
             }
         }
+        return false;
     }
 
     public List<LabWork> filterGreaterThanMinimalPoint(Long minimalPoint) {

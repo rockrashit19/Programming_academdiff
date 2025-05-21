@@ -22,14 +22,24 @@ public class UpdateIdCommand extends AbstractCommand {
         }
         try {
             long id = Long.parseLong(argument);
-            LabWork labWork = (LabWork) args[0];
+            LabWork newLabWork = (LabWork) args[0];
             if (!collectionManager.containsId(id)) {
                 return new CommandResponse(false, "No LabWork found with id " + id, null);
             }
-            collectionManager.update(id, labWork);
+            LabWork oldLabWork = collectionManager.getAll().stream()
+                    .filter(lw -> lw.getId() == id)
+                    .findFirst()
+                    .orElse(null);
+            if (oldLabWork != null) {
+                newLabWork.setCreationDate(oldLabWork.getCreationDate());
+            }
+            newLabWork.setId(id);
+            collectionManager.update(id, newLabWork);
             return new CommandResponse(true, "LabWork updated successfully!", null);
         } catch (NumberFormatException e) {
             return new CommandResponse(false, "Invalid id format: " + argument, null);
+        } catch (Exception e) {
+            return new CommandResponse(false, "Error updating LabWork: " + e.getMessage(), null);
         }
     }
 }

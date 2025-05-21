@@ -130,21 +130,19 @@ public class InputManager {
         }
     }
 
-    public LabWork getLabWorkFromInput() {
-        try {
-            outputManager.println("Creating a new LabWork...");
-
-            String name = getStringInput("Enter name: ", false);
-            Coordinates coordinates = getCoordinatesFromInput();
-
-            Long minimalPoint = getLongInput("Enter minimalPoint (can be null, > 0): ", true, 0);
-            Difficulty difficulty = getEnumInput("Enter difficulty (can be null): ", Difficulty.class, false);
-            Person author = getPersonFromInput();
-
-            return new LabWork(0, name, coordinates, ZonedDateTime.now(), minimalPoint, difficulty, author);
-        } catch (InvalidDataException e) {
-            outputManager.println("Error creating LabWork: " + e.getMessage());
-            return null;
+    public LabWork getLabWorkFromInput() throws InvalidDataException {
+        outputManager.println("Creating a new LabWork...");
+        while (true) {
+            try {
+                String name = getStringInput("Enter name: ", false);
+                Coordinates coordinates = getCoordinatesFromInput();
+                Long minimalPoint = getLongInput("Enter minimalPoint (can be null, > 0): ", true, 0);
+                Difficulty difficulty = getEnumInput("Enter difficulty (can be null): ", Difficulty.class, true);
+                Person author = getPersonFromInput();
+                return new LabWork(0, name, coordinates, ZonedDateTime.now(), minimalPoint, difficulty, author);
+            } catch (InvalidDataException e) {
+                outputManager.println("Error creating LabWork: " + e.getMessage() + ". Please try again.");
+            }
         }
     }
 
@@ -160,18 +158,19 @@ public class InputManager {
         }
     }
 
-    public Person getPersonFromInput() {
-        try {
-            outputManager.println("Creating Person...");
-            String name = getStringInput("Enter person's name: ", false);
-            ZonedDateTime birthday = getZonedDateTimeInput("Enter birthday (ISO 8601 format): ");
-            String passportID = getStringInput("Enter passport ID: ", false);
-            Color eyeColor = getEnumInput("Enter eye color: ", Color.class, false);
-            Color hairColor = getEnumInput("Enter hair color (can be null): ", Color.class, true);
-            return new Person(name, birthday, passportID, eyeColor, hairColor);
-        } catch (InvalidDataException e) {
-            outputManager.println("Error creating Person: " + e.getMessage());
-            return null;
+    public Person getPersonFromInput() throws InvalidDataException {
+        while (true) {
+            try {
+                outputManager.println("Creating Person...");
+                String name = getStringInput("Enter person's name: ", false);
+                ZonedDateTime birthday = getZonedDateTimeInput("Enter birthday (ISO 8601 format): ");
+                String passportID = getStringInput("Enter passport ID: ", false);
+                Color eyeColor = getEnumInput("Enter eye color: ", Color.class, false);
+                Color hairColor = getEnumInput("Enter hair color (can be null): ", Color.class, true);
+                return new Person(name, birthday, passportID, eyeColor, hairColor);
+            } catch (InvalidDataException e) {
+                outputManager.println("Error creating Person: " + e.getMessage());
+            }
         }
     }
 }

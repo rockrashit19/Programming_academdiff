@@ -2,6 +2,7 @@ package lab5.main.java.command;
 
 import lab5.main.java.collection.CollectionManager;
 import lab5.main.java.data.LabWork;
+import lab5.main.java.exception.InvalidDataException;
 import lab5.main.java.util.InputManager;
 import lab5.main.java.util.OutputManager;
 
@@ -25,7 +26,14 @@ public class AddCommand extends AbstractCommand {
                 throw new IllegalArgumentException("This command doesn't require an argument.");
             }
 
-            LabWork newLabWork = inputManager.getLabWorkFromInput();
+            LabWork newLabWork;
+            try {
+                newLabWork = inputManager.getLabWorkFromInput();
+            } catch (InvalidDataException e) {
+                outputManager.println("Error creating LabWork: " + e.getMessage());
+                return false;
+            }
+
             newLabWork.setId(collectionManager.generateNextId());
             newLabWork.setCreationDate(java.time.ZonedDateTime.now());
             collectionManager.add(newLabWork);
